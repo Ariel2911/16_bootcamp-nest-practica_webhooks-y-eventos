@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { DiscordService } from 'src/discord/discord.service';
 import {
   GitHubEvent,
   GitHubIssue,
@@ -8,8 +9,13 @@ import {
 
 @Injectable()
 export class WhGithubService {
-  public handlePayload(event: GitHubEvent, payload: GitHubPayload) {
+  constructor(private readonly discordService: DiscordService) {}
+
+  public async handlePayload(event: GitHubEvent, payload: GitHubPayload) {
     let message = '';
+
+    console.log('switch:', message, 'event: ', event);
+    console.log('first');
 
     switch (event) {
       case 'star':
@@ -25,7 +31,9 @@ export class WhGithubService {
         break;
     }
 
-    console.log(message);
+    // console.log(message);
+
+    await this.discordService.notify(message);
   }
 
   private handleStar(payload: GitHubPayload) {
