@@ -4,6 +4,7 @@ import {
   GitHubEvent,
   GitHubIssue,
   GitHubPayload,
+  GitHubPush,
   GitHubStar,
 } from 'src/interfaces/wh-github.interface';
 
@@ -14,9 +15,6 @@ export class WhGithubService {
   public async handlePayload(event: GitHubEvent, payload: GitHubPayload) {
     let message = '';
 
-    console.log('switch:', message, 'event: ', event);
-    console.log('first');
-
     switch (event) {
       case 'star':
         message = this.handleStar(payload as GitHubStar);
@@ -26,12 +24,14 @@ export class WhGithubService {
         message = this.handleIssue(payload as GitHubIssue);
         break;
 
+      case 'push':
+        message = this.handlePush(payload as GitHubPush);
+        break;
+
       default:
         message = `unknown event ${event}`;
         break;
     }
-
-    // console.log(message);
 
     await this.discordService.notify(message);
   }
@@ -57,5 +57,10 @@ export class WhGithubService {
     }
 
     return `Unhandle action for the issue event ${action}`;
+  }
+
+  private handlePush(payload: GitHubPayload) {
+    const { sender, repository } = payload;
+    return `User ${sender.login} push on ${repository.full_name}`;
   }
 }
